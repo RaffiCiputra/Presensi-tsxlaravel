@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Clock, Mail, Lock, CheckCircle, LogIn } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -22,35 +22,21 @@ export function LoginPage() {
     setError("");
     setLoading(true);
 
-    console.log('🔐 Login attempt:', { email });
-
     try {
       const response = await authAPI.login({ email, password });
-
-      console.log('✅ Login successful:', response.data);
-
       const { user, token } = response.data;
 
-      // Save to localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      console.log('💾 Saved to localStorage');
-
-      // Route based on role
       if (user.role === "admin") {
-        console.log('🔀 Redirecting to admin dashboard');
         navigate("/admin/dashboard");
       } else if (user.role === "user") {
-        console.log('🔀 Redirecting to user dashboard');
         navigate("/user/dashboard");
       } else {
         setError("Invalid user role");
       }
     } catch (err: any) {
-      console.error('❌ Login error:', err);
-      console.error('❌ Response:', err.response?.data);
-      
       setError(
         err.response?.data?.message ||
           "Invalid email or password. Please try again."
@@ -70,38 +56,6 @@ export function LoginPage() {
 
       <div className="login-content">
         <div className="login-card">
-          {/* Header */}
-          <div className="login-header">
-            <div className="login-logo-wrapper">
-              <Clock className="login-logo-icon" />
-            </div>
-            <h1 className="login-title">AttendPro</h1>
-            <p className="login-subtitle">
-              Attendance & Cash Flow Management System
-            </p>
-          </div>
-
-          {/* Features Grid */}
-          <div className="login-features-grid">
-            <div className="login-feature-item">
-              <div className="login-feature-icon">
-                <Clock className="icon" />
-              </div>
-              <span className="login-feature-text">Face Recognition</span>
-            </div>
-            <div className="login-feature-item">
-              <div className="login-feature-icon">
-                <CheckCircle className="icon" />
-              </div>
-              <span className="login-feature-text">QR Code Scanner</span>
-            </div>
-            <div className="login-feature-item">
-              <div className="login-feature-icon">
-                <Lock className="icon" />
-              </div>
-              <span className="login-feature-text">Cash Flow Tracking</span>
-            </div>
-          </div>
 
           {/* Form Card */}
           <div className="login-form-wrapper">
@@ -109,7 +63,7 @@ export function LoginPage() {
               <LogIn className="login-form-icon" />
               <h2 className="login-form-title">Sign In</h2>
               <p className="login-form-subtitle">
-                Enter your credentials to access your account
+                Masukkan NIK dan password untuk masuk ke dashboard Anda.
               </p>
             </div>
 
@@ -205,24 +159,17 @@ export function LoginPage() {
               <div className="login-demo-title">Demo Credentials:</div>
               <div className="login-demo-grid">
                 <div className="login-demo-item">
-                  <span className="login-demo-badge login-demo-badge-admin">
-                    Admin
-                  </span>
-                  <span className="login-demo-text">
-                    admin@example.com / admin123
-                  </span>
+                  <span className="login-demo-badge login-demo-badge-admin">Admin</span>
+                  <span className="login-demo-text">admin@example.com / admin123</span>
                 </div>
                 <div className="login-demo-item">
-                  <span className="login-demo-badge login-demo-badge-user">
-                    User
-                  </span>
-                  <span className="login-demo-text">
-                    alice@example.com / user123
-                  </span>
+                  <span className="login-demo-badge login-demo-badge-user">User</span>
+                  <span className="login-demo-text">alice@example.com / user123</span>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
