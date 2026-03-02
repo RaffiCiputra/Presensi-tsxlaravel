@@ -1,7 +1,21 @@
-import { Users, Clock, TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
 import {
+  Users,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import {
+  ResponsiveContainer,
   LineChart,
   Line,
   BarChart,
@@ -11,7 +25,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
 } from "recharts";
 
 const attendanceData = [
@@ -107,7 +120,11 @@ export function DashboardPage() {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div key={stat.title} className={`stat-card ${stat.colorClass}`} style={{ animationDelay: `${index * 0.1}s` }}>
+              <div
+                key={stat.title}
+                className={`stat-card card-hover-animated ${stat.colorClass}`}
+                style={{ animationDelay: `${index * 0.08}s` }}
+              >
                 <div className="stat-card-header">
                   <div className="stat-icon-wrapper">
                     <Icon className="stat-icon" />
@@ -125,7 +142,7 @@ export function DashboardPage() {
                   <p className="stat-label">{stat.title}</p>
                   <h3 className="stat-value">{stat.value}</h3>
                 </div>
-                <div className="stat-card-glow"></div>
+                <div className="stat-card-glow" />
               </div>
             );
           })}
@@ -134,11 +151,11 @@ export function DashboardPage() {
         {/* Charts */}
         <div className="charts-grid">
           {/* Attendance Chart */}
-          <div className="chart-card">
-            <div className="chart-header">
-              <h3 className="chart-title">Absensi Perminggu</h3>
-            </div>
-            <div className="chart-content">
+          <Card className="chart-card card-hover-animated">
+            <CardHeader className="chart-header">
+              <CardTitle className="chart-title">Absensi Perminggu</CardTitle>
+            </CardHeader>
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={attendanceData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -150,23 +167,24 @@ export function DashboardPage() {
                       border: "none",
                       borderRadius: "12px",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                      padding: "10px 12px",
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="Hadir" fill="#2596be" radius={[8, 8, 0, 0]} />
-                  <Bar dataKey="Telat" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-                  <Bar dataKey="Tidak Masuk" fill="#ef4444" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="Hadir" fill="#4b9cd4" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Telat" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Tidak Masuk" fill="#ef4444" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Cash Flow Chart */}
-          <div className="chart-card">
-            <div className="chart-header">
-              <h3 className="chart-title">Alur Kas</h3>
-            </div>
-            <div className="chart-content">
+          <Card className="chart-card card-hover-animated">
+            <CardHeader className="chart-header">
+              <CardTitle className="chart-title">Alur Kas</CardTitle>
+            </CardHeader>
+            <CardContent className="chart-content">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={cashFlowData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -178,6 +196,7 @@ export function DashboardPage() {
                       border: "none",
                       borderRadius: "12px",
                       boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                      padding: "10px 12px",
                     }}
                   />
                   <Legend />
@@ -199,20 +218,24 @@ export function DashboardPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tables */}
         <div className="tables-grid">
           {/* Recent Attendance */}
-          <div className="table-card">
-            <div className="table-header">
-              <h3 className="table-title">Absensi Terbaru</h3>
-            </div>
-            <div className="table-content">
+          <Card className="table-card card-hover-animated">
+            <CardHeader className="table-header">
+              <CardTitle className="table-title">Absensi Terbaru</CardTitle>
+            </CardHeader>
+            <CardContent className="table-content">
               {recentAttendance.map((record, index) => (
-                <div key={record.id} className="attendance-item" style={{ animationDelay: `${index * 0.05}s` }}>
+                <div
+                  key={record.id}
+                  className="attendance-item"
+                  style={{ animationDelay: `${index * 0.06}s` }}
+                >
                   <div className="attendance-avatar">
                     {record.name.charAt(0)}
                   </div>
@@ -227,17 +250,21 @@ export function DashboardPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Recent Activities */}
-          <div className="table-card">
-            <div className="table-header">
-              <h3 className="table-title">Aktivitas Terbaru</h3>
-            </div>
-            <div className="table-content">
+          <Card className="table-card card-hover-animated">
+            <CardHeader className="table-header">
+              <CardTitle className="table-title">Aktivitas Terbaru</CardTitle>
+            </CardHeader>
+            <CardContent className="table-content">
               {recentActivities.map((activity, index) => (
-                <div key={activity.id} className="activity-item" style={{ animationDelay: `${index * 0.05}s` }}>
+                <div
+                  key={activity.id}
+                  className="activity-item"
+                  style={{ animationDelay: `${index * 0.06}s` }}
+                >
                   <div className={`activity-icon activity-${activity.type}`}>
                     <Activity size={16} />
                   </div>
@@ -247,8 +274,8 @@ export function DashboardPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

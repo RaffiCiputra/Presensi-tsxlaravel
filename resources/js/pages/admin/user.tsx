@@ -1,8 +1,21 @@
 import { useState } from "react";
-import { UserPlus, Search, MoreVertical, Edit, Trash2, Key, Camera } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  UserPlus,
+  Search,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Key,
+  Camera,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
+  import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import {
@@ -91,7 +104,8 @@ export function UsersPage() {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const [formData, setFormData] = useState({
@@ -102,32 +116,21 @@ export function UsersPage() {
     status: "Active" as User["status"],
   });
 
+  const [formError, setFormError] = useState("");
+
   const filteredUsers = users.filter((user) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.department.toLowerCase().includes(searchQuery.toLowerCase());
+      user.name.toLowerCase().includes(q) ||
+      user.email.toLowerCase().includes(q) ||
+      user.department.toLowerCase().includes(q);
 
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
 
     return matchesSearch && matchesRole;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u));
-    } else {
-      const newUser: User = {
-        id: Math.max(...users.map(u => u.id)) + 1,
-        ...formData,
-      };
-      setUsers([...users, newUser]);
-    }
-
-    setIsAddDialogOpen(false);
-    setEditingUser(null);
+  const resetForm = () => {
     setFormData({
       name: "",
       email: "",
@@ -135,6 +138,46 @@ export function UsersPage() {
       department: "",
       status: "Active",
     });
+    setEditingUser(null);
+    setFormError("");
+  };
+
+  const openCreateDialog = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError("");
+
+    if (!formData.name.trim() || !formData.email.trim()) {
+      setFormError("Nama dan email wajib diisi.");
+      return;
+    }
+    if (!formData.department.trim()) {
+      setFormError("Department wajib dipilih.");
+      return;
+    }
+
+    if (editingUser) {
+      // UPDATE
+      setUsers((prev) =>
+        prev.map((u) => (u.id === editingUser.id ? { ...u, ...formData } : u)),
+      );
+    } else {
+      // CREATE
+      const nextId =
+        users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+      const newUser: User = {
+        id: nextId,
+        ...formData,
+      };
+      setUsers((prev) => [...prev, newUser]);
+    }
+
+    setIsDialogOpen(false);
+    resetForm();
   };
 
   const handleEdit = (user: User) => {
@@ -146,11 +189,18 @@ export function UsersPage() {
       department: user.department,
       status: user.status,
     });
-    setIsAddDialogOpen(true);
+    setFormError("");
+    setIsDialogOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    setUsers(users.filter(u => u.id !== id));
+    if (!window.confirm("Yakin ingin menghapus user ini?")) return;
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+  };
+
+  const handleResetPassword = (user: User) => {
+    // di sini nanti bisa diganti dengan call API reset password
+    window.alert(`Password untuk ${user.name} berhasil di-reset (dummy).`);
   };
 
   const getRoleBadgeClass = (role: string) => {
@@ -173,49 +223,66 @@ export function UsersPage() {
           <p>Manage user accounts and permissions</p>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="users-add-btn">
+            <Button className="users-add-btn" onClick={openCreateDialog}>
               <UserPlus className="h-4 w-4 mr-2" />
               Add User
             </Button>
           </DialogTrigger>
+
           <DialogContent className="users-dialog">
             <DialogHeader className="users-dialog-header">
               <DialogTitle className="users-dialog-title">
                 {editingUser ? "Edit User" : "Add New User"}
               </DialogTitle>
             </DialogHeader>
+
             <form onSubmit={handleSubmit} className="users-form">
               <div className="users-form-grid">
                 <div className="users-form-group">
-                  <Label htmlFor="name" className="users-form-label">Nama Lengkap</Label>
+                  <Label htmlFor="name" className="users-form-label">
+                    Nama Lengkap
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                     className="users-form-input"
                   />
                 </div>
 
                 <div className="users-form-group">
-                  <Label htmlFor="email" className="users-form-label">Email</Label>
+                  <Label htmlFor="email" className="users-form-label">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     required
                     className="users-form-input"
                   />
                 </div>
 
                 <div className="users-form-group">
-                  <Label htmlFor="role" className="users-form-label">Jabatan</Label>
+                  <Label htmlFor="role" className="users-form-label">
+                    Jabatan
+                  </Label>
                   <Select
                     value={formData.role}
-                    onValueChange={(value) => setFormData({ ...formData, role: value as User["role"] })}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        role: value as User["role"],
+                      })
+                    }
                   >
                     <SelectTrigger className="users-form-select">
                       <SelectValue />
@@ -229,10 +296,14 @@ export function UsersPage() {
                 </div>
 
                 <div className="users-form-group">
-                  <Label htmlFor="department" className="users-form-label">Department</Label>
+                  <Label htmlFor="department" className="users-form-label">
+                    Department
+                  </Label>
                   <Select
                     value={formData.department}
-                    onValueChange={(value) => setFormData({ ...formData, department: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, department: value })
+                    }
                   >
                     <SelectTrigger className="users-form-select">
                       <SelectValue />
@@ -247,10 +318,17 @@ export function UsersPage() {
                 </div>
 
                 <div className="users-form-group">
-                  <Label htmlFor="status" className="users-form-label">Status</Label>
+                  <Label htmlFor="status" className="users-form-label">
+                    Status
+                  </Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value as User["status"] })}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value as User["status"],
+                      })
+                    }
                   >
                     <SelectTrigger className="users-form-select">
                       <SelectValue />
@@ -263,49 +341,68 @@ export function UsersPage() {
                 </div>
               </div>
 
+              {/* Photo (dummy) */}
               <div className="users-photo-section">
                 <Label className="users-form-label">Profile Photo</Label>
                 <div className="users-photo-upload">
                   <div className="users-photo-placeholder">
                     <Camera className="users-photo-icon" />
                   </div>
-                  <Button type="button" variant="outline" size="sm" className="users-photo-btn">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="users-photo-btn"
+                  >
                     Upload Photo
                   </Button>
                 </div>
               </div>
 
               <div className="users-photo-section">
-                <Label className="users-form-label">Face Recognition Photo</Label>
+                <Label className="users-form-label">
+                  Face Recognition Photo
+                </Label>
                 <div className="users-photo-upload">
                   <div className="users-photo-placeholder users-photo-placeholder-square">
                     <Camera className="users-photo-icon" />
                   </div>
                   <div>
-                    <Button type="button" variant="outline" size="sm" className="users-photo-btn mb-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="users-photo-btn mb-1"
+                    >
                       Upload Face Photo
                     </Button>
                     <p className="users-photo-hint">
-                      Upload a clear photo of the user's face for facial recognition
+                      Upload a clear photo of the user's face for facial
+                      recognition
                     </p>
                   </div>
                 </div>
               </div>
+
+              {formError && (
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "#b91c1c",
+                    marginTop: 4,
+                  }}
+                >
+                  {formError}
+                </p>
+              )}
 
               <div className="users-form-actions">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    setIsAddDialogOpen(false);
-                    setEditingUser(null);
-                    setFormData({
-                      name: "",
-                      email: "",
-                      role: "User",
-                      department: "",
-                      status: "Active",
-                    });
+                    setIsDialogOpen(false);
+                    resetForm();
                   }}
                   className="users-cancel-btn"
                 >
@@ -349,7 +446,9 @@ export function UsersPage() {
       {/* Users Table */}
       <Card className="users-table-card">
         <CardHeader className="users-table-header">
-          <CardTitle className="users-table-title">All Users ({filteredUsers.length})</CardTitle>
+          <CardTitle className="users-table-title">
+            All Users ({filteredUsers.length})
+          </CardTitle>
         </CardHeader>
         <CardContent className="users-table-content">
           <Table className="users-table">
@@ -395,16 +494,29 @@ export function UsersPage() {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="users-action-btn">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="users-action-btn"
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="users-dropdown-menu">
-                        <DropdownMenuItem onClick={() => handleEdit(user)} className="users-dropdown-item">
+                      <DropdownMenuContent
+                        align="end"
+                        className="users-dropdown-menu"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => handleEdit(user)}
+                          className="users-dropdown-item"
+                        >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="users-dropdown-item">
+                        <DropdownMenuItem
+                          className="users-dropdown-item"
+                          onClick={() => handleResetPassword(user)}
+                        >
                           <Key className="h-4 w-4 mr-2" />
                           Reset Password
                         </DropdownMenuItem>
@@ -420,6 +532,13 @@ export function UsersPage() {
                   </TableCell>
                 </TableRow>
               ))}
+              {filteredUsers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6">
+                    No users found with current filter.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

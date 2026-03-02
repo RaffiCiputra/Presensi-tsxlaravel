@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Clock,
-  Bell,
-  Globe,
-  Database,
-  Save,
-  Camera,
-} from "lucide-react";
+import { Database, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -56,7 +49,7 @@ export function SettingsPage() {
   return (
     <div className="settings-page-container">
       <Toaster />
-      
+
       {/* Header */}
       <div className="settings-header">
         <h1 className="settings-title">Settings</h1>
@@ -68,10 +61,18 @@ export function SettingsPage() {
       {/* Tabs */}
       <Tabs defaultValue="general" className="settings-tabs">
         <TabsList className="settings-tabs-list">
-          <TabsTrigger value="general" className="settings-tab-trigger">General</TabsTrigger>
-          <TabsTrigger value="attendance" className="settings-tab-trigger">Attendance</TabsTrigger>
-          <TabsTrigger value="notifications" className="settings-tab-trigger">Notifications</TabsTrigger>
-          <TabsTrigger value="system" className="settings-tab-trigger">System</TabsTrigger>
+          <TabsTrigger value="general" className="settings-tab-trigger">
+            General
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="settings-tab-trigger">
+            Attendance
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="settings-tab-trigger">
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="system" className="settings-tab-trigger">
+            System
+          </TabsTrigger>
         </TabsList>
 
         {/* General Settings */}
@@ -82,7 +83,9 @@ export function SettingsPage() {
             </CardHeader>
             <CardContent className="settings-card-content">
               <div className="settings-form-group">
-                <Label htmlFor="language" className="settings-label">Language</Label>
+                <Label htmlFor="language" className="settings-label">
+                  Language
+                </Label>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger id="language" className="settings-select">
                     <SelectValue />
@@ -95,15 +98,21 @@ export function SettingsPage() {
               </div>
 
               <div className="settings-form-group">
-                <Label htmlFor="timezone" className="settings-label">Timezone</Label>
+                <Label htmlFor="timezone" className="settings-label">
+                  Timezone
+                </Label>
                 <Select defaultValue="asia-jakarta">
                   <SelectTrigger id="timezone" className="settings-select">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="asia-jakarta">Asia/Jakarta (GMT+7)</SelectItem>
-                    <SelectItem value="america-new-york">America/New York (GMT-5)</SelectItem>
-                    <SelectItem value="europe-london">Europe/London (GMT+0)</SelectItem>
+                    <SelectItem value="america-new-york">
+                      America/New York (GMT-5)
+                    </SelectItem>
+                    <SelectItem value="europe-london">
+                      Europe/London (GMT+0)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -120,7 +129,9 @@ export function SettingsPage() {
             <CardContent className="settings-card-content">
               <div className="settings-grid-2">
                 <div className="settings-form-group">
-                  <Label htmlFor="startTime" className="settings-label">Start Time</Label>
+                  <Label htmlFor="startTime" className="settings-label">
+                    Start Time
+                  </Label>
                   <Input
                     id="startTime"
                     type="time"
@@ -133,7 +144,9 @@ export function SettingsPage() {
                 </div>
 
                 <div className="settings-form-group">
-                  <Label htmlFor="endTime" className="settings-label">End Time</Label>
+                  <Label htmlFor="endTime" className="settings-label">
+                    End Time
+                  </Label>
                   <Input
                     id="endTime"
                     type="time"
@@ -154,12 +167,16 @@ export function SettingsPage() {
 
           <Card className="settings-card">
             <CardHeader className="settings-card-header">
-              <CardTitle className="settings-card-title">Face Recognition Settings</CardTitle>
+              <CardTitle className="settings-card-title">
+                Face Recognition Settings
+              </CardTitle>
             </CardHeader>
             <CardContent className="settings-card-content">
               <div className="settings-slider-wrapper">
                 <div className="settings-slider-header">
-                  <Label htmlFor="threshold" className="settings-label">Recognition Threshold</Label>
+                  <Label htmlFor="threshold" className="settings-label">
+                    Recognition Threshold
+                  </Label>
                   <span className="settings-slider-value">
                     {faceRecognition.threshold}%
                   </span>
@@ -171,12 +188,15 @@ export function SettingsPage() {
                   step={5}
                   value={[faceRecognition.threshold]}
                   onValueChange={(value) =>
-                    setFaceRecognition({ ...faceRecognition, threshold: value[0] })
+                    setFaceRecognition({
+                      ...faceRecognition,
+                      threshold: value[0],
+                    })
                   }
                   className="settings-slider"
                 />
                 <p className="settings-helper-text">
-                  Higher values require more accurate face matches (recommended: 80-90%)
+                  Higher values require more accurate face matches (recommended: 80–90%)
                 </p>
               </div>
 
@@ -197,7 +217,9 @@ export function SettingsPage() {
 
               <div className="settings-switch-wrapper">
                 <div className="settings-switch-label-wrapper">
-                  <Label className="settings-switch-title">Save Attendance Images</Label>
+                  <Label className="settings-switch-title">
+                    Save Attendance Images
+                  </Label>
                   <p className="settings-switch-description">
                     Store captured photos for record keeping
                   </p>
@@ -219,7 +241,9 @@ export function SettingsPage() {
             <CardContent className="settings-card-content">
               <div className="settings-switch-wrapper">
                 <div className="settings-switch-label-wrapper">
-                  <Label className="settings-switch-title">Enable QR Code Check-in</Label>
+                  <Label className="settings-switch-title">
+                    Enable QR Code Check-in
+                  </Label>
                   <p className="settings-switch-description">
                     Allow employees to check in using QR codes
                   </p>
@@ -249,12 +273,16 @@ export function SettingsPage() {
         <TabsContent value="notifications" className="settings-tab-content">
           <Card className="settings-card">
             <CardHeader className="settings-card-header">
-              <CardTitle className="settings-card-title">Notification Preferences</CardTitle>
+              <CardTitle className="settings-card-title">
+                Notification Preferences
+              </CardTitle>
             </CardHeader>
             <CardContent className="settings-card-content">
               <div className="settings-switch-wrapper">
                 <div className="settings-switch-label-wrapper">
-                  <Label className="settings-switch-title">Attendance Notifications</Label>
+                  <Label className="settings-switch-title">
+                    Attendance Notifications
+                  </Label>
                   <p className="settings-switch-description">
                     Get notified about check-ins and late arrivals
                   </p>
@@ -269,7 +297,9 @@ export function SettingsPage() {
 
               <div className="settings-switch-wrapper">
                 <div className="settings-switch-label-wrapper">
-                  <Label className="settings-switch-title">Cash Flow Notifications</Label>
+                  <Label className="settings-switch-title">
+                    Cash Flow Notifications
+                  </Label>
                   <p className="settings-switch-description">
                     Receive updates about financial transactions
                   </p>
@@ -284,7 +314,9 @@ export function SettingsPage() {
 
               <div className="settings-switch-wrapper">
                 <div className="settings-switch-label-wrapper">
-                  <Label className="settings-switch-title">User Management Notifications</Label>
+                  <Label className="settings-switch-title">
+                    User Management Notifications
+                  </Label>
                   <p className="settings-switch-description">
                     Alerts for new users and account changes
                   </p>
@@ -299,7 +331,9 @@ export function SettingsPage() {
 
               <div className="settings-switch-wrapper">
                 <div className="settings-switch-label-wrapper">
-                  <Label className="settings-switch-title">System Notifications</Label>
+                  <Label className="settings-switch-title">
+                    System Notifications
+                  </Label>
                   <p className="settings-switch-description">
                     Important system updates and maintenance alerts
                   </p>
@@ -319,16 +353,22 @@ export function SettingsPage() {
         <TabsContent value="system" className="settings-tab-content">
           <Card className="settings-card">
             <CardHeader className="settings-card-header">
-              <CardTitle className="settings-card-title">Database Management</CardTitle>
+              <CardTitle className="settings-card-title">
+                Database Management
+              </CardTitle>
             </CardHeader>
             <CardContent className="settings-card-content">
               <div className="settings-section">
                 <h4 className="settings-section-title">Backup Database</h4>
                 <p className="settings-section-description">
-                  Create a backup of all system data including users, attendance records, and
-                  transactions
+                  Create a backup of all system data including users, attendance records,
+                  and transactions.
                 </p>
-                <Button onClick={handleBackupDatabase} variant="outline" className="settings-button-outline">
+                <Button
+                  onClick={handleBackupDatabase}
+                  variant="outline"
+                  className="settings-button-outline"
+                >
                   <Database className="h-4 w-4 mr-2" />
                   Create Backup
                 </Button>
@@ -387,7 +427,9 @@ export function SettingsPage() {
 
           <Card className="settings-card">
             <CardHeader className="settings-card-header">
-              <CardTitle className="settings-card-title">System Information</CardTitle>
+              <CardTitle className="settings-card-title">
+                System Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="settings-card-content">
               <div className="settings-info-row">

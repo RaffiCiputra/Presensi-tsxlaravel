@@ -7,23 +7,21 @@ export function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="h-screen overflow-hidden bg-background text-foreground">
+    <div className="admin-layout">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Right Section */}
-      <div className="flex h-full flex-col lg:pl-64">
-        
-        {/* Navbar (fixed height) */}
-        <div className="shrink-0">
+      <div className="admin-main">
+        {/* Navbar */}
+        <div className="admin-main-header">
           <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         </div>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="admin-main-content">
           <Outlet />
         </main>
-
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
-import { Bell, Menu, Moon, Sun, User, Globe } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Bell, Menu, User, Globe } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -17,12 +16,10 @@ interface NavbarProps {
 }
 
 export function Navbar({ onMenuClick }: NavbarProps) {
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   return (
     <header className="navbar-container">
-      
       {/* Mobile Menu */}
       <Button
         variant="ghost"
@@ -35,9 +32,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
       {/* Title */}
       <div className="navbar-title-section">
-        <h2 className="navbar-welcome-text">
-          Welcome back, John Doe
-        </h2>
+        <h2 className="navbar-welcome-text">Welcome back, John Doe</h2>
         <p className="navbar-date-text">
           {new Date().toLocaleDateString("en-US", {
             weekday: "long",
@@ -50,7 +45,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 
       {/* Right Section */}
       <div className="navbar-actions">
-
         {/* Language */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -68,49 +62,47 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Dark Mode Toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="navbar-icon-button navbar-theme-toggle"
-        >
-          <Sun className="navbar-theme-icon sun" />
-          <Moon className="navbar-theme-icon moon" />
-        </Button>
-
         {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="navbar-icon-button">
               <Bell className="size-5" />
-              <Badge className="navbar-notification-badge">
-                3
-              </Badge>
+              <Badge className="navbar-notification-badge">3</Badge>
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="navbar-dropdown-menu navbar-notification-dropdown">
-            <DropdownMenuLabel className="navbar-dropdown-label">Notifications</DropdownMenuLabel>
+          <DropdownMenuContent
+            align="end"
+            className="navbar-dropdown-menu navbar-notification-dropdown"
+          >
+            <DropdownMenuLabel className="navbar-dropdown-label">
+              Notifications
+            </DropdownMenuLabel>
             <DropdownMenuSeparator className="navbar-dropdown-separator" />
 
             <div className="navbar-notification-list">
               <DropdownMenuItem className="navbar-notification-item">
-                <p className="navbar-notification-title">New attendance recorded</p>
+                <p className="navbar-notification-title">
+                  New attendance recorded
+                </p>
                 <p className="navbar-notification-time">
                   Alice Johnson checked in - 2 min ago
                 </p>
               </DropdownMenuItem>
 
               <DropdownMenuItem className="navbar-notification-item">
-                <p className="navbar-notification-title">Late arrival detected</p>
+                <p className="navbar-notification-title">
+                  Late arrival detected
+                </p>
                 <p className="navbar-notification-time">
                   Bob Smith arrived late - 15 min ago
                 </p>
               </DropdownMenuItem>
 
               <DropdownMenuItem className="navbar-notification-item">
-                <p className="navbar-notification-title">Cash flow updated</p>
+                <p className="navbar-notification-title">
+                  Cash flow updated
+                </p>
                 <p className="navbar-notification-time">
                   New transaction added - 1 hour ago
                 </p>
@@ -128,9 +120,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               </div>
 
               <div className="navbar-user-info">
-                <span className="navbar-user-name">
-                  John Doe
-                </span>
+                <span className="navbar-user-name">John Doe</span>
                 <Badge variant="secondary" className="navbar-user-role">
                   Admin
                 </Badge>
@@ -138,24 +128,21 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="navbar-dropdown-menu">
-            <DropdownMenuLabel className="navbar-dropdown-label">My Account</DropdownMenuLabel>
+          <DropdownMenuContent
+            align="end"
+            className="navbar-dropdown-menu"
+          >
+            <DropdownMenuLabel className="navbar-dropdown-label">
+              My Account
+            </DropdownMenuLabel>
             <DropdownMenuSeparator className="navbar-dropdown-separator" />
 
-            <DropdownMenuItem 
+            <DropdownMenuItem
               className="navbar-dropdown-item"
               onClick={() => navigate("/profile")}
             >
               <User className="size-4" />
               Profile
-            </DropdownMenuItem>
-
-            <DropdownMenuItem 
-              className="navbar-dropdown-item"
-              onClick={() => navigate("/settings")}
-            >
-              <Moon className="size-4" />
-              Settings
             </DropdownMenuItem>
 
             <DropdownMenuSeparator className="navbar-dropdown-separator" />
@@ -168,7 +155,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
     </header>
   );

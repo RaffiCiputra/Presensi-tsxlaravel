@@ -9,7 +9,12 @@ import {
   User2,
 } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import {
@@ -44,6 +49,7 @@ export function AttendancePage() {
 
   useEffect(() => {
     loadAttendance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadAttendance = async () => {
@@ -55,12 +61,13 @@ export function AttendancePage() {
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
-      // asumsi attendanceAPI.getAdminAbsensi() memanggil /api/admin/absensi
       const response = await attendanceAPI.getAbsensi(params);
-setRecords(response.data as AdminAttendanceRow[]);
+      setRecords(response.data as AdminAttendanceRow[]);
     } catch (error: any) {
       console.error("Failed to load attendance:", error);
-      setErrorMessage(error.response?.data?.message || "Failed to load attendance data");
+      setErrorMessage(
+        error?.response?.data?.message || "Failed to load attendance data"
+      );
     } finally {
       setLoading(false);
     }
@@ -287,7 +294,9 @@ setRecords(response.data as AdminAttendanceRow[]);
                     <TableCell>
                       <Badge
                         variant={statusVariant(row.status)}
-                        className={`admin-att-status-badge ${statusClass(row.status)}`}
+                        className={`admin-att-status-badge ${statusClass(
+                          row.status
+                        )}`}
                       >
                         {row.status === "on_time" && (
                           <CheckCircle className="admin-att-status-icon" />
