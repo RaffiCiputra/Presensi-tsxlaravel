@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "."
+  },
+  "include": [
+    "resources/js/**/*.ts",
+    "resources/js/**/*.tsx"
+, "frontend/src/main.tsx"  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
