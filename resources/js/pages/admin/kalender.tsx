@@ -5,27 +5,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { ScrollArea } from "../../components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "../../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { useNavigate, Link } from "react-router-dom";
-import { 
-  Calendar as CalendarIcon, 
-  ChevronLeft, 
-  ChevronRight, 
-  Plus, 
-  Trash2, 
-  Bell, 
-  Clock, 
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Bell,
+  Clock,
   ArrowLeft,
   Edit,
   Users,
-  Save
+  Save,
 } from "lucide-react";
 import { cn } from "../../components/ui/utils";
-import { api, type ApiEvent, type CalendarEvent, mapApiToCalendar } from "../../lib/api";
+import { calendarAPI, type ApiEvent, type CalendarEvent, mapApiToCalendar } from "../../lib/api";
 
 export function CalendarPage() {
   const navigate = useNavigate();
@@ -44,7 +57,6 @@ export function CalendarPage() {
     staffName: "",
   });
 
-  // Load events from API
   React.useEffect(() => {
     loadEvents();
   }, []);
@@ -52,18 +64,17 @@ export function CalendarPage() {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const response = await api.get<ApiEvent[]>("/api/events");
+      const response = await calendarAPI.getAll();
       const mapped = response.data.map(mapApiToCalendar);
       setEvents(mapped.sort((a, b) => a.date.getTime() - b.date.getTime()));
-    } catch (error) {
-      console.error("Failed to load events:", error);
-      alert("Gagal memuat event");
+    } catch (error: any) {
+      console.error("Gagal memuat event:", error);
+      alert(error.response?.data?.message || "Gagal memuat event");
     } finally {
       setLoading(false);
     }
   };
 
-  // Request notification permission
   React.useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -77,7 +88,6 @@ export function CalendarPage() {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startDay = firstDay.getDay();
-
     return { daysInMonth, startDay, year, month };
   };
 
@@ -128,15 +138,24 @@ export function CalendarPage() {
         created_by: "Admin",
       };
 
-      const response = await api.post<ApiEvent>("/api/admin/events", payload);
-      const created = mapApiToCalendar(response.data);
+      const response = await calendarAPI.create(payload);
+      const created: ApiEvent = response.data;
+      const createdMapped = mapApiToCalendar(created);
 
-      setEvents((prev) => [...prev, created].sort((a, b) => a.date.getTime() - b.date.getTime()));
-      setNewEvent({ title: "", description: "", time: "", notifyBefore: 30, staffName: "" });
+      setEvents((prev) =>
+        [...prev, createdMapped].sort((a, b) => a.date.getTime() - b.date.getTime())
+      );
+      setNewEvent({
+        title: "",
+        description: "",
+        time: "",
+        notifyBefore: 30,
+        staffName: "",
+      });
       setIsDialogOpen(false);
       setSelectedDate(null);
     } catch (error: any) {
-      console.error("Failed to create event:", error);
+      console.error("Gagal membuat event:", error);
       alert(error.response?.data?.message || "Gagal membuat event");
     } finally {
       setLoading(false);
@@ -157,17 +176,19 @@ export function CalendarPage() {
         reminder_sent: editingEvent.reminderSent ?? false,
       };
 
-      const response = await api.put<ApiEvent>(`/api/admin/events/${editingEvent.id}`, payload);
+      const response = await calendarAPI.updateAdmin(editingEvent.id, payload);
       const updated = mapApiToCalendar(response.data);
 
       setEvents((prev) =>
-        prev.map((e) => (e.id === editingEvent.id ? updated : e)).sort((a, b) => a.date.getTime() - b.date.getTime())
+        prev
+          .map((e) => (e.id === editingEvent.id ? updated : e))
+          .sort((a, b) => a.date.getTime() - b.date.getTime())
       );
 
       setIsEditDialogOpen(false);
       setEditingEvent(null);
     } catch (error: any) {
-      console.error("Failed to update event:", error);
+      console.error("Gagal mengupdate event:", error);
       alert(error.response?.data?.message || "Gagal mengupdate event");
     } finally {
       setLoading(false);
@@ -179,10 +200,10 @@ export function CalendarPage() {
 
     try {
       setLoading(true);
-      await api.delete(`/api/admin/events/${eventId}`);
+      await calendarAPI.delete(eventId);
       setEvents((prev) => prev.filter((e) => e.id !== eventId));
     } catch (error: any) {
-      console.error("Failed to delete event:", error);
+      console.error("Gagal menghapus event:", error);
       alert(error.response?.data?.message || "Gagal menghapus event");
     } finally {
       setLoading(false);
@@ -200,12 +221,26 @@ export function CalendarPage() {
 
   const { daysInMonth, startDay, year, month } = getDaysInMonth(currentDate);
   const monthNames = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
   ];
   const weekDays = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
-  const upcomingEvents = events.filter((e) => e.date >= new Date());
+  // Pakai startOfToday agar event hari ini tetap tampil meskipun jam sudah lewat
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = events.filter((e) => e.date >= startOfToday);
   const todayEvents = events.filter((e) => isToday(e.date));
 
   return (
@@ -221,7 +256,7 @@ export function CalendarPage() {
             Dashboard
           </Link>
           <span className="calendar-breadcrumb-separator">/</span>
-          <span className="calendar-breadcrumb-current">Event Calendar</span>
+          <span className="calendar-breadcrumb-current">Kalender Event</span>
         </div>
       </div>
 
@@ -238,7 +273,7 @@ export function CalendarPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="calendar-stat-card">
           <CardContent className="calendar-stat-content">
             <div className="calendar-stat-icon calendar-today-icon">
@@ -250,7 +285,7 @@ export function CalendarPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="calendar-stat-card">
           <CardContent className="calendar-stat-content">
             <div className="calendar-stat-icon calendar-upcoming-icon">
@@ -309,9 +344,14 @@ export function CalendarPage() {
                 const today = isToday(date);
 
                 return (
-                  <Dialog 
-                    key={day} 
-                    open={selectedDate?.getDate() === day && selectedDate?.getMonth() === month ? isDialogOpen : false}
+                  <Dialog
+                    key={day}
+                    open={
+                      selectedDate?.getDate() === day &&
+                      selectedDate?.getMonth() === month
+                        ? isDialogOpen
+                        : false
+                    }
                     onOpenChange={(open) => {
                       if (!open) {
                         setIsDialogOpen(false);
@@ -333,7 +373,9 @@ export function CalendarPage() {
                       >
                         <span className="calendar-day-number">{day}</span>
                         {dayEvents.length > 0 && (
-                          <Badge className="calendar-event-count-badge">{dayEvents.length}</Badge>
+                          <Badge className="calendar-event-count-badge">
+                            {dayEvents.length}
+                          </Badge>
                         )}
                       </button>
                     </DialogTrigger>
@@ -345,52 +387,73 @@ export function CalendarPage() {
                       </DialogHeader>
                       <div className="calendar-event-form">
                         <div className="calendar-form-group">
-                          <Label htmlFor="title" className="calendar-form-label">Judul Event *</Label>
+                          <Label htmlFor="title" className="calendar-form-label">
+                            Judul Event *
+                          </Label>
                           <Input
                             id="title"
                             value={newEvent.title}
-                            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                            onChange={(e) =>
+                              setNewEvent({ ...newEvent, title: e.target.value })
+                            }
                             placeholder="Contoh: Meeting Tim Marketing"
                             className="calendar-form-input"
                           />
                         </div>
                         <div className="calendar-form-group">
-                          <Label htmlFor="staffName" className="calendar-form-label">Nama Staff/User</Label>
+                          <Label htmlFor="staffName" className="calendar-form-label">
+                            Nama Staff/User
+                          </Label>
                           <Input
                             id="staffName"
                             value={newEvent.staffName}
-                            onChange={(e) => setNewEvent({ ...newEvent, staffName: e.target.value })}
+                            onChange={(e) =>
+                              setNewEvent({ ...newEvent, staffName: e.target.value })
+                            }
                             placeholder="Nama staff yang bertanggung jawab"
                             className="calendar-form-input"
                           />
                         </div>
                         <div className="calendar-form-group">
-                          <Label htmlFor="time" className="calendar-form-label">Waktu *</Label>
+                          <Label htmlFor="time" className="calendar-form-label">
+                            Waktu *
+                          </Label>
                           <Input
                             id="time"
                             type="time"
                             value={newEvent.time}
-                            onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
+                            onChange={(e) =>
+                              setNewEvent({ ...newEvent, time: e.target.value })
+                            }
                             className="calendar-form-input"
                           />
                         </div>
                         <div className="calendar-form-group">
-                          <Label htmlFor="description" className="calendar-form-label">Deskripsi</Label>
+                          <Label htmlFor="description" className="calendar-form-label">
+                            Deskripsi
+                          </Label>
                           <Textarea
                             id="description"
                             value={newEvent.description}
-                            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                            onChange={(e) =>
+                              setNewEvent({ ...newEvent, description: e.target.value })
+                            }
                             placeholder="Detail tambahan tentang event..."
                             rows={3}
                             className="calendar-form-textarea"
                           />
                         </div>
                         <div className="calendar-form-group">
-                          <Label htmlFor="notify" className="calendar-form-label">Ingatkan Sebelum</Label>
+                          <Label htmlFor="notify" className="calendar-form-label">
+                            Ingatkan Sebelum
+                          </Label>
                           <Select
                             value={newEvent.notifyBefore.toString()}
                             onValueChange={(value) =>
-                              setNewEvent({ ...newEvent, notifyBefore: parseInt(value) })
+                              setNewEvent({
+                                ...newEvent,
+                                notifyBefore: parseInt(value),
+                              })
                             }
                           >
                             <SelectTrigger className="calendar-form-select">
@@ -408,13 +471,21 @@ export function CalendarPage() {
                         </div>
                       </div>
                       <DialogFooter className="calendar-dialog-footer">
-                        <Button variant="outline" onClick={() => {
-                          setIsDialogOpen(false);
-                          setSelectedDate(null);
-                        }} disabled={loading}>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsDialogOpen(false);
+                            setSelectedDate(null);
+                          }}
+                          disabled={loading}
+                        >
                           Batal
                         </Button>
-                        <Button onClick={handleAddEvent} className="calendar-add-event-button" disabled={loading}>
+                        <Button
+                          onClick={handleAddEvent}
+                          className="calendar-add-event-button"
+                          disabled={loading}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           {loading ? "Menyimpan..." : "Tambah Event"}
                         </Button>
@@ -433,7 +504,9 @@ export function CalendarPage() {
             <div className="calendar-events-header">
               <div className="calendar-events-title-wrapper">
                 <CalendarIcon className="h-5 w-5" />
-                <CardTitle className="calendar-events-title">Event Mendatang</CardTitle>
+                <CardTitle className="calendar-events-title">
+                  Event Mendatang
+                </CardTitle>
               </div>
               <Badge variant="outline" className="calendar-staff-badge">
                 <Users className="h-3 w-3 mr-1" />
@@ -447,7 +520,9 @@ export function CalendarPage() {
                 <div className="calendar-no-events">
                   <CalendarIcon className="h-12 w-12 calendar-empty-icon" />
                   <p className="calendar-empty-text">Tidak ada event mendatang</p>
-                  <p className="calendar-empty-subtext">Klik tanggal untuk menambah event</p>
+                  <p className="calendar-empty-subtext">
+                    Klik tanggal untuk menambah event
+                  </p>
                 </div>
               ) : (
                 <div className="calendar-events-list">
@@ -455,16 +530,23 @@ export function CalendarPage() {
                     <Card key={event.id} className="calendar-event-item-card">
                       <CardContent className="calendar-event-item-content">
                         <div className="calendar-event-date-badge">
-                          <span className="calendar-event-badge-day">{event.date.getDate()}</span>
+                          <span className="calendar-event-badge-day">
+                            {event.date.getDate()}
+                          </span>
                           <span className="calendar-event-badge-month">
                             {monthNames[event.date.getMonth()].slice(0, 3)}
                           </span>
                         </div>
                         <div className="calendar-event-details">
-                          <h4 className="calendar-event-item-title">{event.title}</h4>
+                          <h4 className="calendar-event-item-title">
+                            {event.title}
+                          </h4>
                           {event.staffName && (
                             <div className="calendar-event-staff-wrapper">
-                              <Badge variant="outline" className="calendar-event-staff-badge">
+                              <Badge
+                                variant="outline"
+                                className="calendar-event-staff-badge"
+                              >
                                 {event.staffName}
                               </Badge>
                             </div>
@@ -479,15 +561,19 @@ export function CalendarPage() {
                             </span>
                           </div>
                           {event.description && (
-                            <p className="calendar-event-description">{event.description}</p>
+                            <p className="calendar-event-description">
+                              {event.description}
+                            </p>
                           )}
                           {event.notifyBefore && (
                             <div className="calendar-event-reminder">
                               <Bell className="h-3 w-3" />
                               <span>
-                                Reminder {event.notifyBefore < 60 
-                                  ? `${event.notifyBefore} menit` 
-                                  : `${event.notifyBefore / 60} jam`} sebelumnya
+                                Reminder{" "}
+                                {event.notifyBefore < 60
+                                  ? `${event.notifyBefore} menit`
+                                  : `${event.notifyBefore / 60} jam`}{" "}
+                                sebelumnya
                               </span>
                             </div>
                           )}
@@ -526,30 +612,48 @@ export function CalendarPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="calendar-dialog-content">
           <DialogHeader>
-            <DialogTitle className="calendar-dialog-title">Edit Event</DialogTitle>
+            <DialogTitle className="calendar-dialog-title">
+              Edit Event
+            </DialogTitle>
           </DialogHeader>
           {editingEvent && (
             <div className="calendar-event-form">
               <div className="calendar-form-group">
-                <Label htmlFor="edit-title" className="calendar-form-label">Judul Event</Label>
+                <Label htmlFor="edit-title" className="calendar-form-label">
+                  Judul Event
+                </Label>
                 <Input
                   id="edit-title"
                   value={editingEvent.title}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditingEvent({ ...editingEvent, title: e.target.value })
+                  }
                   className="calendar-form-input"
                 />
               </div>
               <div className="calendar-form-group">
-                <Label htmlFor="edit-staffName" className="calendar-form-label">Nama Staff/User</Label>
+                <Label
+                  htmlFor="edit-staffName"
+                  className="calendar-form-label"
+                >
+                  Nama Staff/User
+                </Label>
                 <Input
                   id="edit-staffName"
                   value={editingEvent.staffName || ""}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, staffName: e.target.value })}
+                  onChange={(e) =>
+                    setEditingEvent({
+                      ...editingEvent,
+                      staffName: e.target.value,
+                    })
+                  }
                   className="calendar-form-input"
                 />
               </div>
               <div className="calendar-form-group">
-                <Label htmlFor="edit-time" className="calendar-form-label">Waktu</Label>
+                <Label htmlFor="edit-time" className="calendar-form-label">
+                  Waktu
+                </Label>
                 <Input
                   id="edit-time"
                   type="time"
@@ -564,21 +668,39 @@ export function CalendarPage() {
                 />
               </div>
               <div className="calendar-form-group">
-                <Label htmlFor="edit-description" className="calendar-form-label">Deskripsi</Label>
+                <Label
+                  htmlFor="edit-description"
+                  className="calendar-form-label"
+                >
+                  Deskripsi
+                </Label>
                 <Textarea
                   id="edit-description"
                   value={editingEvent.description || ""}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditingEvent({
+                      ...editingEvent,
+                      description: e.target.value,
+                    })
+                  }
                   rows={3}
                   className="calendar-form-textarea"
                 />
               </div>
               <div className="calendar-form-group">
-                <Label htmlFor="edit-notify" className="calendar-form-label">Ingatkan Sebelum</Label>
+                <Label
+                  htmlFor="edit-notify"
+                  className="calendar-form-label"
+                >
+                  Ingatkan Sebelum
+                </Label>
                 <Select
                   value={editingEvent.notifyBefore?.toString() || "30"}
                   onValueChange={(value) =>
-                    setEditingEvent({ ...editingEvent, notifyBefore: parseInt(value) })
+                    setEditingEvent({
+                      ...editingEvent,
+                      notifyBefore: parseInt(value),
+                    })
                   }
                 >
                   <SelectTrigger className="calendar-form-select">
@@ -597,10 +719,18 @@ export function CalendarPage() {
             </div>
           )}
           <DialogFooter className="calendar-dialog-footer">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+              disabled={loading}
+            >
               Batal
             </Button>
-            <Button onClick={handleEditEvent} className="calendar-save-event-button" disabled={loading}>
+            <Button
+              onClick={handleEditEvent}
+              className="calendar-save-event-button"
+              disabled={loading}
+            >
               <Save className="h-4 w-4 mr-2" />
               {loading ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>

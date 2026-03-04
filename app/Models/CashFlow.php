@@ -9,8 +9,19 @@ class CashFlow extends Model
     const UPDATED_AT = null;
 
     protected $table = 'cash_flow';
-    protected $fillable = ['description', 'amount', 'type', 'date', 'created_by'];
-    protected $casts = ['date' => 'date', 'amount' => 'decimal:2'];
+
+    protected $fillable = [
+        'description',
+        'amount',
+        'type',
+        'date',
+        'created_by',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+        'amount' => 'decimal:2',
+    ];
 
     public function creator()
     {

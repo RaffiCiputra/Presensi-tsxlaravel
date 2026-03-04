@@ -10,54 +10,29 @@ use Illuminate\Support\Facades\Validator;
 
 class EventController extends Controller
 {
-    /**
-     * List semua event (dipakai admin & user).
-     */
     public function index()
     {
         try {
             $events = CalendarEvent::orderBy('event_at', 'asc')->get();
-            $data = $events->map(fn ($event) => $event->toFrontendArray());
-
-            return response()->json($data);
+            return response()->json($events->map(fn($e) => $e->toFrontendArray()));
         } catch (\Exception $e) {
             Log::error('Event index error', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Failed to fetch events',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Failed to fetch events', 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * List event yang akan datang saja (opsional).
-     */
     public function upcoming()
     {
         try {
-            $now = now();
-
-            $events = CalendarEvent::where('event_at', '>=', $now)
-                ->orderBy('event_at', 'asc')
-                ->get();
-
-            $data = $events->map(fn ($event) => $event->toFrontendArray());
-
-            return response()->json($data);
+            $events = CalendarEvent::where('event_at', '>=', now())
+                ->orderBy('event_at', 'asc')->get();
+            return response()->json($events->map(fn($e) => $e->toFrontendArray()));
         } catch (\Exception $e) {
             Log::error('Event upcoming error', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Failed to fetch upcoming events',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Failed to fetch upcoming events', 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Admin create event (dipakai CalendarPage.handleAddEvent).
-     */
     public function store(Request $request)
     {
         Log::info('Creating event', ['payload' => $request->all()]);
@@ -72,12 +47,7 @@ class EventController extends Controller
         ]);
 
         if ($validator->fails()) {
-            Log::warning('Event validation failed', ['errors' => $validator->errors()]);
-
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors'  => $validator->errors(),
-            ], 422);
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
         }
 
         try {
@@ -92,31 +62,33 @@ class EventController extends Controller
             ]);
 
             Log::info('Event created', ['id' => $event->id]);
-
             return response()->json($event->toFrontendArray(), 201);
         } catch (\Exception $e) {
             Log::error('Event store error', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Failed to create event',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Failed to create event', 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Update event (dipakai admin edit, dan user untuk set reminder_sent).
-     */
     public function update(Request $request, $id)
     {
         $event = CalendarEvent::find($id);
-
-        if (! $event) {
-            return response()->json([
-                'message' => 'Event not found',
-            ], 404);
+        if (!$event) {
+            return response()->json(['message' => 'Event not found'], 404);
         }
 
+        // ✅ FIX: User biasa hanya boleh update reminder_sent
+        $isAdmin = $request->user()?->role === 'admin';
+
+        if (!$isAdmin) {
+            if (!$request->has('reminder_sent')) {
+                return response()->json(['message' => 'Unauthorized to update event fields'], 403);
+            }
+            $event->update(['reminder_sent' => (bool) $request->reminder_sent]);
+            $event->refresh();
+            return response()->json($event->toFrontendArray());
+        }
+
+        // Admin: full update
         $validator = Validator::make($request->all(), [
             'title'         => 'sometimes|required|string|max:255',
             'description'   => 'nullable|string',
@@ -127,35 +99,17 @@ class EventController extends Controller
         ]);
 
         if ($validator->fails()) {
-            Log::warning('Event update validation failed', ['errors' => $validator->errors()]);
-
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors'  => $validator->errors(),
-            ], 422);
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
         }
 
         try {
             $data = [];
-
-            if ($request->has('title')) {
-                $data['title'] = $request->title;
-            }
-            if ($request->has('description')) {
-                $data['description'] = $request->description;
-            }
-            if ($request->has('event_at')) {
-                $data['event_at'] = $request->event_at;
-            }
-            if ($request->has('notify_before')) {
-                $data['notify_before'] = $request->notify_before;
-            }
-            if ($request->has('staff_name')) {
-                $data['staff_name'] = $request->staff_name;
-            }
-            if ($request->has('reminder_sent')) {
-                $data['reminder_sent'] = (bool) $request->reminder_sent;
-            }
+            if ($request->has('title'))         $data['title']         = $request->title;
+            if ($request->has('description'))   $data['description']   = $request->description;
+            if ($request->has('event_at'))      $data['event_at']      = $request->event_at;
+            if ($request->has('notify_before')) $data['notify_before'] = $request->notify_before;
+            if ($request->has('staff_name'))    $data['staff_name']    = $request->staff_name;
+            if ($request->has('reminder_sent')) $data['reminder_sent'] = (bool) $request->reminder_sent;
 
             $event->update($data);
             $event->refresh();
@@ -163,68 +117,40 @@ class EventController extends Controller
             return response()->json($event->toFrontendArray());
         } catch (\Exception $e) {
             Log::error('Event update error', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Failed to update event',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Failed to update event', 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Hapus event (dipakai CalendarPage.handleDeleteEvent).
-     */
     public function destroy($id)
     {
         $event = CalendarEvent::find($id);
-
-        if (! $event) {
-            return response()->json([
-                'message' => 'Event not found',
-            ], 404);
+        if (!$event) {
+            return response()->json(['message' => 'Event not found'], 404);
         }
 
         try {
             $event->delete();
-
-            return response()->json([
-                'message' => 'Event deleted successfully',
-            ]);
+            return response()->json(['message' => 'Event deleted successfully']);
         } catch (\Exception $e) {
             Log::error('Event delete error', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Failed to delete event',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Failed to delete event', 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Statistik event (opsional, untuk dashboard admin).
-     */
     public function stats()
     {
         try {
-            $now      = now();
-            $today    = $now->copy()->startOfDay();
-            $todayEnd = $now->copy()->endOfDay();
-
+            $now = now();
             $stats = [
                 'total'    => CalendarEvent::count(),
-                'today'    => CalendarEvent::whereBetween('event_at', [$today, $todayEnd])->count(),
+                'today'    => CalendarEvent::whereBetween('event_at', [$now->copy()->startOfDay(), $now->copy()->endOfDay()])->count(),
                 'upcoming' => CalendarEvent::where('event_at', '>=', $now)->count(),
                 'past'     => CalendarEvent::where('event_at', '<', $now)->count(),
             ];
-
             return response()->json($stats);
         } catch (\Exception $e) {
             Log::error('Event stats error', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'message' => 'Failed to fetch statistics',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Failed to fetch statistics', 'error' => $e->getMessage()], 500);
         }
     }
 }

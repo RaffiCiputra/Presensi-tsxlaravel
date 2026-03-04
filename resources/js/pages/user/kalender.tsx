@@ -7,7 +7,7 @@ import { Badge } from "../../components/ui/badge";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { useNavigate, Link } from "react-router-dom";
 import { Calendar as CalendarIcon, Bell, Clock, ArrowLeft } from "lucide-react";
-import { api, type ApiEvent, type CalendarEvent, mapApiToCalendar } from "../../lib/api";
+import { calendarAPI, type CalendarEvent, mapApiToCalendar } from "../../lib/api";
 
 export function CalendarReminder() {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export function CalendarReminder() {
   const [loading, setLoading] = React.useState(false);
   const reminderSentRef = React.useRef(false);
 
-  // Load events from API
+  // Load events dari API
   React.useEffect(() => {
     loadEvents();
   }, []);
@@ -23,44 +23,49 @@ export function CalendarReminder() {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const response = await api.get<ApiEvent[]>("/api/events");
+      const response = await calendarAPI.getAll();
       const mapped = response.data.map(mapApiToCalendar);
       setEvents(mapped.sort((a, b) => a.date.getTime() - b.date.getTime()));
     } catch (error) {
-      console.error("Failed to load events:", error);
+      console.error("Gagal memuat event:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Request notification permission
+  // Reset flag reminder setiap halaman dibuka
+  React.useEffect(() => {
+    reminderSentRef.current = false;
+  }, []);
+
+  // Minta izin notifikasi
   React.useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
 
-  // H-1 Reminder System
+  // Sistem reminder H-1
   React.useEffect(() => {
     if (reminderSentRef.current || events.length === 0) return;
 
     const checkAndSendReminders = async () => {
       const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
+      const besokAwal = new Date(now);
+      besokAwal.setDate(besokAwal.getDate() + 1);
+      besokAwal.setHours(0, 0, 0, 0);
 
-      const tomorrowEnd = new Date(tomorrow);
-      tomorrowEnd.setHours(23, 59, 59, 999);
+      const besokAkhir = new Date(besokAwal);
+      besokAkhir.setHours(23, 59, 59, 999);
 
-      const tomorrowEvents = events.filter(
-        (e) => !e.reminderSent && e.date >= tomorrow && e.date <= tomorrowEnd
+      const eventsBesok = events.filter(
+        (e) => !e.reminderSent && e.date >= besokAwal && e.date <= besokAkhir
       );
 
-      if (tomorrowEvents.length === 0) {
-        reminderSentRef.current = true;
-        return;
-      }
+      // Tandai sudah dicek (supaya tidak berulang)
+      reminderSentRef.current = true;
+
+      if (eventsBesok.length === 0) return;
 
       if ("Notification" in window) {
         if (Notification.permission !== "granted") {
@@ -68,17 +73,17 @@ export function CalendarReminder() {
           if (permission !== "granted") return;
         }
 
-        for (const event of tomorrowEvents) {
-          new Notification("🔔 Reminder Event (H-1)", {
-            body: `${event.title} akan dimulai besok pada ${event.date.toLocaleString("id-ID", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}`,
+        for (const event of eventsBesok) {
+          new Notification("🔔 Pengingat Event (H-1)", {
+            body: `${event.title} akan dimulai besok pada ${event.date.toLocaleTimeString(
+              "id-ID",
+              { hour: "2-digit", minute: "2-digit" }
+            )}`,
             icon: "/calendar-icon.png",
           });
 
           try {
-            await api.put(`/api/events/${event.id}`, {
+            await calendarAPI.updateReminder(event.id, {
               title: event.title,
               description: event.description || null,
               event_at: event.date.toISOString(),
@@ -87,11 +92,11 @@ export function CalendarReminder() {
               reminder_sent: true,
             });
           } catch (error) {
-            console.error("Failed to update reminder status:", error);
+            console.error("Gagal mengupdate status reminder:", error);
           }
         }
 
-        reminderSentRef.current = true;
+        // Refresh events setelah update reminder
         loadEvents();
       }
     };
@@ -113,27 +118,34 @@ export function CalendarReminder() {
   };
 
   const monthNames = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
   ];
 
   const now = new Date();
 
-// awal hari ini
-const startOfToday = new Date(now);
-startOfToday.setHours(0, 0, 0, 0);
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
 
-// 3 hari ke depan (akhir hari)
-const threeDaysLater = new Date(startOfToday);
-threeDaysLater.setDate(threeDaysLater.getDate() + 3);
-threeDaysLater.setHours(23, 59, 59, 999);
+  const threeDaysLater = new Date(startOfToday);
+  threeDaysLater.setDate(threeDaysLater.getDate() + 3);
+  threeDaysLater.setHours(23, 59, 59, 999);
 
-const upcomingEvents = events.filter((e) => e.date >= startOfToday);
-const todayEvents = events.filter((e) => isToday(e.date));
-const upcoming3Days = events.filter(
-  (e) => e.date >= startOfToday && e.date <= threeDaysLater
-);
-
+  const upcomingEvents = events.filter((e) => e.date >= startOfToday);
+  const todayEvents = events.filter((e) => isToday(e.date));
+  const upcoming3Days = events.filter(
+    (e) => e.date >= startOfToday && e.date <= threeDaysLater
+  );
 
   return (
     <div className="calendar-reminder-container">
@@ -144,13 +156,15 @@ const upcoming3Days = events.filter(
           Kembali
         </Button>
         <div className="breadcrumb">
-          <Link to="/" className="breadcrumb-link">Dashboard</Link>
+          <Link to="/" className="breadcrumb-link">
+            Dashboard
+          </Link>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-current">Event Calendar</span>
+          <span className="breadcrumb-current">Kalender Event</span>
         </div>
       </div>
 
-      {/* Banner 3 hari */}
+      {/* Banner 3 hari ke depan */}
       {upcoming3Days.length > 0 && (
         <Card className="mb-4 border-yellow-500 bg-yellow-50">
           <CardContent className="py-3">
@@ -164,7 +178,7 @@ const upcoming3Days = events.filter(
         </Card>
       )}
 
-      {/* Stats Cards */}
+      {/* Kartu Statistik */}
       <div className="stats-grid">
         <Card className="stat-card">
           <CardContent className="stat-content">
@@ -177,7 +191,7 @@ const upcoming3Days = events.filter(
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="stat-card">
           <CardContent className="stat-content">
             <div className="stat-icon today-icon">
@@ -189,7 +203,7 @@ const upcoming3Days = events.filter(
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="stat-card">
           <CardContent className="stat-content">
             <div className="stat-icon upcoming-icon">
@@ -203,7 +217,7 @@ const upcoming3Days = events.filter(
         </Card>
       </div>
 
-      {/* Events List Card */}
+      {/* Daftar Event */}
       <Card className="events-card">
         <CardHeader>
           <CardTitle className="events-title">
@@ -223,19 +237,21 @@ const upcoming3Days = events.filter(
               <div className="events-list">
                 {upcomingEvents.map((event) => {
                   const eventDate = new Date(event.date);
-                  const tomorrow = new Date(now);
-                  tomorrow.setDate(now.getDate() + 1);
-                  
+                  const besok = new Date(now);
+                  besok.setDate(now.getDate() + 1);
+
                   const isTodayEvent = isToday(eventDate);
-                  const isTomorrowEvent = 
-                    eventDate.getDate() === tomorrow.getDate() &&
-                    eventDate.getMonth() === tomorrow.getMonth() &&
-                    eventDate.getFullYear() === tomorrow.getFullYear();
+                  const isTomorrowEvent =
+                    eventDate.getDate() === besok.getDate() &&
+                    eventDate.getMonth() === besok.getMonth() &&
+                    eventDate.getFullYear() === besok.getFullYear();
 
                   return (
-                    <Card 
-                      key={event.id} 
-                      className={`event-item ${isTodayEvent ? 'border-red-500 bg-red-50' : ''} ${isTomorrowEvent ? 'border-yellow-500 bg-yellow-50' : ''}`}
+                    <Card
+                      key={event.id}
+                      className={`event-item ${
+                        isTodayEvent ? "border-red-500 bg-red-50" : ""
+                      } ${isTomorrowEvent ? "border-yellow-500 bg-yellow-50" : ""}`}
                     >
                       <CardContent className="event-content">
                         <div className="event-date-badge">
@@ -268,14 +284,22 @@ const upcoming3Days = events.filter(
                           {event.notifyBefore && (
                             <div className="event-reminder">
                               <Bell className="h-3 w-3" />
-                              <span>Reminder {event.notifyBefore < 60 ? `${event.notifyBefore} menit` : `${event.notifyBefore / 60} jam`} sebelumnya</span>
+                              <span>
+                                Reminder{" "}
+                                {event.notifyBefore < 60
+                                  ? `${event.notifyBefore} menit`
+                                  : `${event.notifyBefore / 60} jam`}{" "}
+                                sebelum
+                              </span>
                             </div>
                           )}
                           {isTodayEvent && (
                             <Badge className="bg-red-600 mt-2">Hari Ini</Badge>
                           )}
                           {isTomorrowEvent && (
-                            <Badge className="bg-yellow-600 mt-2">Besok (H-1)</Badge>
+                            <Badge className="bg-yellow-600 mt-2">
+                              Besok (H-1)
+                            </Badge>
                           )}
                         </div>
                       </CardContent>

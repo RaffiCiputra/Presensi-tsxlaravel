@@ -91,7 +91,7 @@ export interface ApiEvent {
   event_at: string;
   notify_before: number;
   staff_name: string | null;
-  created_by: string;
+  created_by: string | null; // ✅ Fix: nullable sesuai model
   reminder_sent: boolean;
   created_at: string;
   updated_at: string;
@@ -104,11 +104,11 @@ export interface CalendarEvent {
   description?: string;
   notifyBefore?: number;
   staffName?: string;
-  createdBy: string;
-  createdAt: Date;
+  createdBy?: string; // ✅ Fix: nullable jadi optional
   reminderSent?: boolean;
 }
 
+// ─── MAPPER (PERBAIKAN KECIL) ──────────────────────────────
 export const mapApiToCalendar = (e: ApiEvent): CalendarEvent => ({
   id: String(e.id),
   title: e.title,
@@ -116,44 +116,54 @@ export const mapApiToCalendar = (e: ApiEvent): CalendarEvent => ({
   description: e.description ?? undefined,
   notifyBefore: e.notify_before,
   staffName: e.staff_name ?? undefined,
-  createdBy: e.created_by,
-  createdAt: new Date(e.created_at),
+  createdBy: e.created_by ?? undefined, // ✅ Fix: handle null
   reminderSent: e.reminder_sent,
 });
 
-// ============================================
-// CALENDAR API
-// ============================================
 
 export const calendarAPI = {
-  // All users can view
+  // semua user (admin & user)
   getAll: () => api.get<ApiEvent[]>("/api/events"),
-
   getUpcoming: () => api.get<ApiEvent[]>("/api/events/upcoming"),
 
-  // Admin only
+  // admin only
   create: (data: {
     title: string;
-    description?: string;
+    description?: string | null;
     event_at: string;
     notify_before?: number;
-    staff_name?: string;
-    created_by: string;
+    staff_name?: string | null;
+    created_by?: string;
   }) => api.post<ApiEvent>("/api/admin/events", data),
 
-  update: (
-    id: number,
+  updateAdmin: (
+    id: string | number,
     data: Partial<{
       title: string;
-      description: string;
+      description: string | null;
       event_at: string;
       notify_before: number;
-      staff_name: string;
+      staff_name: string | null;
+      reminder_sent: boolean;
     }>
   ) => api.put<ApiEvent>(`/api/admin/events/${id}`, data),
 
-  delete: (id: number) => api.delete(`/api/admin/events/${id}`),
+  delete: (id: string | number) => api.delete(`/api/admin/events/${id}`),
+
+  // dipakai user/CalendarReminder untuk update reminder_sent
+  updateReminder: (
+    id: string | number,
+    data: Partial<{
+      title: string;
+      description: string | null;
+      event_at: string;
+      notify_before: number;
+      staff_name: string | null;
+      reminder_sent: boolean;
+    }>
+  ) => api.put<ApiEvent>(`/api/events/${id}`, data),
 };
+
 
 // ============================================
 // ATTENDANCE INTERFACES

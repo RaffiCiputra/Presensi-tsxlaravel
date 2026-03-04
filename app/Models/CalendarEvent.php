@@ -7,6 +7,8 @@ use Illuminate\Support\Carbon;
 
 class CalendarEvent extends Model
 {
+    protected $table = 'calendar_events';
+
     protected $fillable = [
         'title',
         'description',

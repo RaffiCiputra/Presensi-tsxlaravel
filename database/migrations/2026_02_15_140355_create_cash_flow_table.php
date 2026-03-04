@@ -11,14 +11,18 @@ return new class extends Migration
         Schema::create('cash_flow', function (Blueprint $table) {
             $table->id();
             $table->text('description');
-            $table->decimal('amount', 12, 2);
+            $table->decimal('amount', 15, 2);
             $table->enum('type', ['income', 'expense']);
             $table->date('date');
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('created_at')->useCurrent();
-            
-            $table->index(['type', 'date']);
-            $table->index('created_by');
+            $table->unsignedBigInteger('created_by');
+            $table->timestamps();
+
+            $table->foreign('created_by')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+
+            $table->index(['created_by', 'date']);
         });
     }
 
