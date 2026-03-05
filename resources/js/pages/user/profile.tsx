@@ -275,6 +275,10 @@ export function ProfilePage() {
                   <span>Change Photo</span>
                   <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
                 </label>
+                <a href="/user/face-register">
+  <button>Daftar Wajah</button>
+</a>
+
                 <p className="upload-photo-note">Requires admin approval</p>
               </div>
 

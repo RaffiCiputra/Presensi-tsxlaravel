@@ -15,10 +15,12 @@ class CheckOutController extends Controller
             $user  = $request->user();
             $today = now()->toDateString();
 
-            // OPTIONAL: kalau mau pakai face recognition flag dari frontend
+            // Validasi
             $request->validate([
                 'face_verified' => 'nullable|boolean',
+                'face_score'    => 'nullable|numeric',
                 'photo'         => 'nullable|image|max:2048',
+                'location'      => 'nullable|string|max:255',
             ]);
 
             if ($request->has('face_verified') && ! $request->boolean('face_verified')) {
@@ -27,7 +29,7 @@ class CheckOutController extends Controller
                 ], 422);
             }
 
-            // Cek apakah SUDAH ada check-out hari ini (tipe out)
+            // Sudah check-out?
             $existingOut = DB::table('attendance')
                 ->where('user_id', $user->id)
                 ->where('date', $today)
@@ -40,7 +42,7 @@ class CheckOutController extends Controller
                 ], 400);
             }
 
-            // (opsional) Cek apakah ADA check-in hari ini dulu
+            // Wajib sudah check-in
             $existingIn = DB::table('attendance')
                 ->where('user_id', $user->id)
                 ->where('date', $today)
@@ -53,25 +55,27 @@ class CheckOutController extends Controller
                 ], 404);
             }
 
-            // Simpan foto kalau ada
             $photoPath = null;
             if ($request->hasFile('photo')) {
                 $photoPath = $request->file('photo')->store('attendance', 'public');
             }
 
-            // Buat record check-out baru
             $attendance = Attendance::create([
-                'user_id'    => $user->id,
-                'type'       => 'out',
-                'date'       => $today,
-                'time'       => now()->toTimeString(),
-                'photo_path' => $photoPath,
+                'user_id'      => $user->id,
+                'type'         => 'out',
+                'date'         => $today,
+                'time'         => now()->toTimeString(),
+                'photo_path'   => $photoPath,
+                'face_verified'=> $request->boolean('face_verified', false),
+                'face_score'   => $request->input('face_score'),
+                'location'     => $request->input('location'),
             ]);
 
             return response()->json([
                 'message'    => 'Checked out successfully.',
                 'attendance' => $attendance,
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),

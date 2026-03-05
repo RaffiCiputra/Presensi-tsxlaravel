@@ -6,11 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class FaceRegistration extends Model
 {
-    const UPDATED_AT = null;
+    // Tidak pakai created_at & updated_at
+    public $timestamps = false;
 
     protected $table = 'face_registration';
-    protected $fillable = ['user_id', 'face_encoding'];
-    protected $casts = ['registered_at' => 'datetime'];
+
+    protected $fillable = [
+        'user_id',
+        'face_encoding',
+        'registered_at',
+    ];
+
+    protected $casts = [
+        'registered_at' => 'datetime',
+    ];
 
     public function user()
     {

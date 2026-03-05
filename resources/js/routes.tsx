@@ -22,6 +22,7 @@ import { CheckInPage } from "./pages/user/check-in";
 import { CheckOutPage } from "./pages/user/check-out";
 import { RiwayatAbsen } from "./pages/user/riwayatabsen";
 import { CalendarReminder } from "./pages/user/kalender";
+import { FaceRegisterPage } from "./pages/user/face-register";
 
 export const router = createBrowserRouter([
   // Root = Login
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
       { path: "check-out", element: <CheckOutPage /> },
       { path: "riwayat-absen", element: <RiwayatAbsen /> },
       { path: "calendar", element: <CalendarReminder /> },
+      { path: "face-register", element: <FaceRegisterPage /> },
     ],
   },
 ]);

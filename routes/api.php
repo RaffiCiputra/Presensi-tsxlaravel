@@ -15,6 +15,7 @@ use App\Http\Controllers\User\CheckOutController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\CashFlowController as UserCashFlow;
 use App\Http\Controllers\User\RiwayatAbsenController;
+use App\Http\Controllers\User\FaceRegistrationController;
 
 // ─── PUBLIC ───────────────────────────────────────────────
 Route::post('/login', [AuthController::class, 'login']);
@@ -66,5 +67,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/cash-flow', [UserCashFlow::class, 'index']);
         Route::post('/cash-flow', [UserCashFlow::class, 'store']);
+
+        // 🔹 Face Registration endpoint untuk user
+        Route::post('/face-register', [FaceRegistrationController::class, 'store']);
     });
 });

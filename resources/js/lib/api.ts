@@ -104,7 +104,7 @@ export interface CalendarEvent {
   description?: string;
   notifyBefore?: number;
   staffName?: string;
-  createdBy?: string; // ✅ Fix: nullable jadi optional
+  createdBy?: string; 
   reminderSent?: boolean;
 }
 
@@ -116,7 +116,7 @@ export const mapApiToCalendar = (e: ApiEvent): CalendarEvent => ({
   description: e.description ?? undefined,
   notifyBefore: e.notify_before,
   staffName: e.staff_name ?? undefined,
-  createdBy: e.created_by ?? undefined, // ✅ Fix: handle null
+  createdBy: e.created_by ?? undefined, 
   reminderSent: e.reminder_sent,
 });
 
@@ -214,10 +214,38 @@ export interface AbsensiRecord {
 
 export const attendanceAPI = {
   // User endpoints
-  checkIn: () =>
-    api.post<{ message: string; attendance: ApiAttendance }>(
-      "/api/user/check-in"
-    ),
+  checkIn: (data?: {
+  photo?: File;
+  face_verified?: boolean;
+  face_score?: number;
+  location?: string;
+}) => {
+  const formData = new FormData();
+
+  if (data?.photo) {
+    formData.append("photo", data.photo);
+  }
+  if (typeof data?.face_verified !== "undefined") {
+    formData.append("face_verified", String(data.face_verified ? 1 : 0));
+  }
+  if (typeof data?.face_score !== "undefined") {
+    formData.append("face_score", String(data.face_score));
+  }
+  if (data?.location) {
+    formData.append("location", data.location);
+  }
+
+  return api.post<{ message: string; attendance: ApiAttendance }>(
+    "/api/user/check-in",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+},
+
 
   // dipakai untuk face recognition check-out
   checkOut: (data?: {
@@ -247,6 +275,28 @@ export function getAdminAbsensi(params?: {
 }) {
   return attendanceAPI.getAbsensi(params);
 }
+
+// ============================================
+// FACE REGISTRATION API
+// ============================================
+
+export const faceAPI = {
+  register: (photo: File) => {
+    const formData = new FormData();
+    formData.append("photo", photo);
+
+    return api.post<{ message: string; data: any }>(
+      "/api/user/face-register",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
+};
+
 
 // ============================================
 // MAPPERS

@@ -49,10 +49,11 @@ export function CheckInPage() {
 
   // Get location and fetch history
   useEffect(() => {
+    // TODO: ganti dengan geolocation API bila perlu
     setTimeout(() => {
       setCurrentLocation("Office - Building A, Floor 3");
     }, 1000);
-    
+
     fetchAttendanceHistory();
   }, []);
 
@@ -71,7 +72,7 @@ export function CheckInPage() {
       const mappedData = response.data.map(mapApiToAttendance);
       setAttendanceHistory(mappedData);
     } catch (error: any) {
-      console.error('Failed to fetch attendance history:', error);
+      console.error("Failed to fetch attendance history:", error);
     }
   };
 
@@ -85,7 +86,7 @@ export function CheckInPage() {
         streamRef.current = stream;
       }
       setIsCameraActive(true);
-      
+
       // Simulate face detection after 2 seconds
       setTimeout(() => {
         setFaceDetected(true);
@@ -122,22 +123,30 @@ export function CheckInPage() {
     setLoading(true);
 
     try {
-      await attendanceAPI.checkIn();
-      
       const currentHour = new Date().getHours();
-      setIsLate(currentHour >= 9);
+      const isLateNow = currentHour >= 9;
+
+      // Nanti ganti 0.95 dengan score asli dari engine face recognition
+      await attendanceAPI.checkIn({
+        // photo: fileDariCaptureKamera, // kalau nanti sudah implement capture
+        face_verified: true,
+        face_score: 0.95,
+        location: currentLocation,
+      });
+
+      setIsLate(isLateNow);
       setShowSuccess(true);
       stopCamera();
-      
+
       // Refresh history
       await fetchAttendanceHistory();
-      
+
       setTimeout(() => setShowSuccess(false), 5000);
     } catch (error: any) {
-      setErrorMessage(error.response?.data?.message || 'Failed to check in');
+      setErrorMessage(error?.response?.data?.message || "Failed to check in");
       setShowError(true);
       setTimeout(() => setShowError(false), 5000);
-      console.error('Check-in error:', error);
+      console.error("Check-in error:", error);
     } finally {
       setLoading(false);
     }
@@ -157,7 +166,7 @@ export function CheckInPage() {
   };
 
   const formatTime = (time: string | null) => {
-    if (!time) return '-';
+    if (!time) return "-";
     return new Date(`2000-01-01 ${time}`).toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -165,7 +174,7 @@ export function CheckInPage() {
   };
 
   const formatStatus = (status: string) => {
-    return status === 'on_time' ? 'on-time' : status;
+    return status === "on_time" ? "on-time" : status;
   };
 
   return (
@@ -195,6 +204,7 @@ export function CheckInPage() {
         </Alert>
       )}
 
+      {/* Info cards */}
       <div className="info-cards">
         <div className="info-card animate-fade-in" style={{ animationDelay: "0.1s" }}>
           <div className="info-card-icon">
@@ -227,6 +237,7 @@ export function CheckInPage() {
         </div>
       </div>
 
+      {/* Action card */}
       <div className="action-card">
         {isCameraActive && (
           <div className="camera-container">
@@ -278,7 +289,7 @@ export function CheckInPage() {
               disabled={(isCameraActive && !faceDetected) || loading}
             >
               <Camera className="button-icon" />
-              {loading ? 'Processing...' : isCameraActive ? "Confirm Check In" : "Start Camera"}
+              {loading ? "Processing..." : isCameraActive ? "Confirm Check In" : "Start Camera"}
             </Button>
             {isCameraActive && (
               <Button
@@ -292,6 +303,7 @@ export function CheckInPage() {
         </div>
       </div>
 
+      {/* History card */}
       <div className="history-card">
         <div className="card-header">
           <div className="header-content">
@@ -316,7 +328,11 @@ export function CheckInPage() {
             </thead>
             <tbody>
               {attendanceHistory.map((record, index) => (
-                <tr key={record.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                <tr
+                  key={record.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
                   <td data-label="Date">
                     <div className="table-date">
                       <Calendar className="size-4" />
