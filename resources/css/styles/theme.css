@@ -2426,7 +2426,6 @@
 /* USERS ADMIN */
 /* ==== LAYOUT GLOBAL USERS PAGE ==== */
 .users-page-container {
-  /* biar tidak terlalu lebar di desktop, tapi tetap full di mobile */
   width: 100%;
   max-width: 1080px;
   margin: 0 auto;
@@ -2434,10 +2433,6 @@
   background-color: #f5f5f7;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #1f2933;
-}
-
-/* kalau di dalam layout lain yang memaksa width kecil, pastikan ini override */
-.users-page-container {
   box-sizing: border-box;
 }
 
@@ -2475,7 +2470,7 @@
   color: #ffffff;
   padding: 8px 18px;
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
-  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .users-add-btn:hover {
@@ -2488,25 +2483,14 @@
     flex-direction: column;
     align-items: flex-start;
   }
-
-  .users-header-content h1 {
-    font-size: 18px;
-  }
-
-  .users-header-content p {
-    font-size: 12px;
-  }
-
-  .users-add-btn {
-    width: 100%;
-    justify-content: center;
-  }
+  .users-header-content h1 { font-size: 18px; }
+  .users-header-content p  { font-size: 12px; }
+  .users-add-btn { width: 100%; justify-content: center; }
 }
 
-/* ==== CARD BASE (FILTER & TABLE & DIALOG) ==== */
+/* ==== CARD BASE ==== */
 .users-filter-card,
-.users-table-card,
-.users-dialog {
+.users-table-card {
   position: relative;
   background-color: #ffffff;
   border-radius: 16px;
@@ -2515,12 +2499,7 @@
     0 18px 45px rgba(15, 23, 42, 0.09),
     0 2px 6px rgba(15, 23, 42, 0.04);
   overflow: hidden;
-  transform: translateY(0) scale(1);
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
 .users-filter-card:hover,
@@ -2533,9 +2512,7 @@
 }
 
 /* ==== FILTER BAR ==== */
-.users-filter-card {
-  margin-bottom: 16px;
-}
+.users-filter-card { margin-bottom: 16px; }
 
 .users-filter-content {
   padding: 12px 14px;
@@ -2567,6 +2544,7 @@
   background-color: #f9fafb;
   border: 1px solid #d1d5db;
   font-size: 14px;
+  width: 100%;
 }
 
 .users-search-input:focus {
@@ -2589,16 +2567,11 @@
     align-items: stretch;
     padding: 10px 10px 12px;
   }
-
-  .users-filter-select {
-    width: 100%;
-  }
+  .users-filter-select { width: 100%; }
 }
 
-/* ==== TABLE WRAPPER – kunci supaya mobile tidak zoom out ==== */
-.users-table-card {
-  margin-top: 16px;
-}
+/* ==== TABLE ==== */
+.users-table-card { margin-top: 16px; }
 
 .users-table-header {
   padding: 12px 14px 8px;
@@ -2613,19 +2586,16 @@
 
 .users-table-content {
   padding: 0;
-  overflow-x: auto; /* hanya tabel yang scroll horizontal */
+  overflow-x: auto;
 }
 
-/* Tabel fleksibel, tapi jangan lebih sempit dari 600px */
 .users-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
 }
 
-.users-table thead tr {
-  background-color: #f3f4f6;
-}
+.users-table thead tr { background-color: #f3f4f6; }
 
 .users-table th,
 .users-table td {
@@ -2640,27 +2610,16 @@
   white-space: nowrap;
 }
 
-.users-table tbody tr:nth-child(even) {
-  background-color: #f9fafb;
-}
-
-.users-table tbody tr:hover {
-  background-color: #eef2ff;
-}
+.users-table tbody tr:nth-child(even) { background-color: #f9fafb; }
+.users-table tbody tr:hover { background-color: #eef2ff; }
 
 @media (max-width: 640px) {
-  .users-table {
-    min-width: 540px;
-  }
-
+  .users-table { min-width: 540px; }
   .users-table th,
-  .users-table td {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
+  .users-table td { padding: 8px 10px; font-size: 12px; }
 }
 
-/* ==== USER CELL ==== */
+/* ==== USER AVATAR CELL ==== */
 .user-avatar-cell {
   display: flex;
   align-items: center;
@@ -2679,6 +2638,7 @@
   font-size: 15px;
   font-weight: 600;
   box-shadow: 0 6px 12px rgba(37, 99, 235, 0.35);
+  flex-shrink: 0;
 }
 
 .user-name {
@@ -2693,75 +2653,128 @@
   font-size: 11px;
   padding: 3px 9px;
 }
-
-.role-badge-superadmin {
-  background-color: #eef2ff;
-  color: #3730a3;
-}
-
-.role-badge-admin {
-  background-color: #e0f2fe;
-  color: #1d4ed8;
-}
-
-.role-badge-user {
-  background-color: #ecfdf3;
-  color: #166534;
-}
+.role-badge-superadmin { background-color: #eef2ff; color: #3730a3; }
+.role-badge-admin      { background-color: #e0f2fe; color: #1d4ed8; }
+.role-badge-user       { background-color: #ecfdf3; color: #166534; }
 
 .status-badge {
   border-radius: 999px;
   font-size: 11px;
   padding: 3px 9px;
 }
-
-.status-badge-active {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-.status-badge-inactive {
-  background-color: #fef2f2;
-  color: #b91c1c;
-}
+.status-badge-active   { background-color: #dcfce7; color: #166534; }
+.status-badge-inactive { background-color: #fef2f2; color: #b91c1c; }
 
 /* ==== ACTIONS ==== */
-.users-action-btn {
-  border-radius: 999px;
-}
+.users-action-btn { border-radius: 999px; }
 
 .users-dropdown-menu {
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   padding: 4px 0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
 
-.users-dropdown-item {
-  font-size: 13px;
-  color: #374151;
+.users-dropdown-item { font-size: 13px; color: #374151; }
+.users-dropdown-item-danger { color: #b91c1c; }
+
+/* ============================================================
+   DIALOG / MODAL — CARD STYLE + CENTERED + TIDAK TEMBUS
+   ============================================================ */
+
+/* Overlay: gelap penuh, tidak tembus */
+[data-radix-dialog-overlay] {
+  position: fixed !important;
+  inset: 0 !important;
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  z-index: 49 !important;
+  animation: overlayFadeIn 180ms ease forwards;
 }
 
-.users-dropdown-item-danger {
-  color: #b91c1c;
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* ==== DIALOG & FORM ==== */
-.users-dialog {
-  max-width: 640px;
+/* Dialog card: solid, centered, tidak tembus */
+[data-radix-dialog-content] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 50 !important;
+  isolation: isolate !important;
+
+  width: 90vw !important;
+  max-width: 600px !important;
+  max-height: 88vh !important;
+  overflow-y: auto !important;
+
+  /* Solid — tidak transparan sama sekali */
+  background: #ffffff !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+
+  /* Card style */
+  border-radius: 24px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.04),
+    0 8px 16px rgba(15, 23, 42, 0.08),
+    0 32px 80px rgba(15, 23, 42, 0.28) !important;
+
+  padding: 0 !important;
+  animation: dialogSlideIn 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Header biru gradient */
 .users-dialog-header {
-  padding-bottom: 4px;
+  background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+  padding: 20px 24px 18px !important;
+  border-radius: 24px 24px 0 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .users-dialog-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.01em;
 }
 
+/* Tombol close jadi putih */
+[data-radix-dialog-content] [data-radix-dialog-close],
+[data-radix-dialog-content] button[aria-label="Close"] {
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 999px !important;
+  transition: background 0.15s;
+}
+
+[data-radix-dialog-content] [data-radix-dialog-close]:hover,
+[data-radix-dialog-content] button[aria-label="Close"]:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #ffffff !important;
+}
+
+/* ==== FORM ==== */
 .users-form {
-  margin-top: 8px;
+  margin-top: 0 !important;
+  padding: 20px 24px 8px !important;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -2773,45 +2786,51 @@
   gap: 14px 16px;
 }
 
-@media (max-width: 640px) {
-  .users-form-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 520px) {
+  .users-form-grid { grid-template-columns: 1fr; }
 }
 
 .users-form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .users-form-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .users-form-input,
 .users-form-select {
   font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background-color: #f9fafb;
+  border-radius: 10px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
+  height: 40px;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
 
 .users-form-input:focus,
 .users-form-select:focus-visible {
-  outline: none;
-  border-color: #2563eb;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12) !important;
 }
 
-/* PHOTO SECTION */
+/* ==== PHOTO SECTION ==== */
 .users-photo-section {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .users-photo-upload {
@@ -2822,69 +2841,95 @@
 }
 
 .users-photo-placeholder {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 999px;
-  background-color: #f3f4f6;
-  border: 1px dashed #d1d5db;
+  background-color: #e2e8f0;
+  border: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .users-photo-placeholder-square {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 12px;
 }
 
 .users-photo-icon {
-  width: 22px;
-  height: 22px;
-  color: #9ca3af;
+  width: 20px;
+  height: 20px;
+  color: #94a3b8;
 }
 
 .users-photo-btn {
-  border-radius: 999px;
+  border-radius: 999px !important;
   font-size: 12px;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #374151 !important;
+}
+
+.users-photo-btn:hover {
+  background: #f1f5f9 !important;
 }
 
 .users-photo-hint {
   font-size: 11px;
-  color: #6b7280;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 
-/* FORM ACTIONS */
+/* ==== FORM ACTIONS (footer card) ==== */
 .users-form-actions {
-  margin-top: 4px;
+  margin: 0 !important;
+  padding: 14px 24px 20px !important;
+  border-top: 1px solid #f1f5f9 !important;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
+  background: #f8fafc;
+  border-radius: 0 0 24px 24px !important;
 }
 
 .users-cancel-btn {
-  border-radius: 999px;
+  border-radius: 999px !important;
+  color: #64748b !important;
+  border: 1.5px solid #e2e8f0 !important;
+  background: #ffffff !important;
+  font-size: 13px !important;
+  padding: 8px 20px !important;
+}
+
+.users-cancel-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
 }
 
 .users-submit-btn {
-  border-radius: 999px;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color: #ffffff;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
-  transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 8px 24px !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35) !important;
+  border: none !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease !important;
 }
 
 .users-submit-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45) !important;
 }
 
-/* Utility */
+/* ==== UTILITY ==== */
 .users-page-container * {
   box-sizing: border-box;
 }
-
 /* NAVBAR ADMIN */
 /* ROOT NAVBAR */
 .navbar-container {
